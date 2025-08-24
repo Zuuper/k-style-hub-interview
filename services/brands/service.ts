@@ -1,4 +1,4 @@
-import type { PaginationProps } from "./dto";
+import type { PaginationProps } from "../utils/dto";
 import { supabase, type TypeSupabaseClient } from "services/db/supabase-client";
 
 export const GetBrandsService = async (
@@ -33,11 +33,8 @@ export const GetBrandDetailService = async (
   db: TypeSupabaseClient = supabase
 ) => {
   const { data, error } = await db.from("brands").select("*").eq("slug", slug);
-  return { data, error };
+  if (error) {
+    throw error;
+  }
+  return { data };
 };
-
-export const PostBrandService = () => {};
-
-export const PutBrandService = () => {};
-
-export const DeleteBrandService = () => {};
