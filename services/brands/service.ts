@@ -7,16 +7,25 @@ export const GetBrandsService = async (
   db: TypeSupabaseClient = supabase
 ) => {
   const currentRange = {
-    start: pagination.nextPage * pagination.totalPage,
-    end: pagination.nextPage * pagination.totalPage + pagination.totalPage,
+    start: (pagination.page - 1) * pagination.itemPerPage,
+    end:
+      (pagination.page - 1) * pagination.itemPerPage + pagination.itemPerPage,
   };
-  const { data, error } = await db
+  let query = db
     .from("brands")
-    .select("*")
-    .ilike("name", search || "")
+    .select("*", { count: "exact" })
     .range(currentRange.start, currentRange.end);
 
-  return { data, error };
+  // Only apply filter if search exists
+  if (search && search.trim() !== "") {
+    query = query.ilike("name", `%${search}%`);
+  }
+  const { count, data, error } = await query;
+
+  if (error) {
+    throw error;
+  }
+  return { data, count };
 };
 
 export const GetBrandDetailService = async (
